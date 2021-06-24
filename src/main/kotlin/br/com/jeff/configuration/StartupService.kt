@@ -16,7 +16,7 @@ class StartupService(private val userRepository: UserRepository) {
     fun onStartupEvent(event: StartupEvent) {
 
         log.info("Event: {}", event.toString())
-        val user = userRepository.save(User(
+        val user = userRepository.saveEncoded(User(
             192168180200,
             "123456"
         ))

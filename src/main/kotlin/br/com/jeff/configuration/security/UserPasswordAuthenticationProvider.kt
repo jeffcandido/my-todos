@@ -1,4 +1,4 @@
-package br.com.jeff.configuration
+package br.com.jeff.configuration.security
 
 import br.com.jeff.repository.UserRepository
 import io.micronaut.http.HttpRequest
@@ -9,7 +9,7 @@ import java.lang.Long.parseLong
 import javax.inject.Singleton
 
 @Singleton
-class UserPasswordAuthenticationProvider(private val userRepository: UserRepository): AuthenticationProvider {
+class UserPasswordAuthenticationProvider(private val userRepository: UserRepository, private val bCryptPasswordEncoderService: BCryptPasswordEncoderService): AuthenticationProvider {
     override fun authenticate(
         httpRequest: HttpRequest<*>?,
         authenticationRequest: AuthenticationRequest<*, *>?
@@ -17,7 +17,7 @@ class UserPasswordAuthenticationProvider(private val userRepository: UserReposit
         val user = userRepository.findById(parseLong(authenticationRequest?.identity as String))
 
         if(user.isPresent) {
-            if(user.get().password == authenticationRequest.secret)
+            if(bCryptPasswordEncoderService.matches(authenticationRequest.secret as String, user.get().password))
                 return Flowable.just(UserDetails(user.get().cpf.toString(), listOf()))
             return Flowable.just(AuthenticationFailed())
         } else {
